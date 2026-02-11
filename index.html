@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Memory Registry - Proof Verifier</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section h2 {
+            color: #1e3a8a;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+        
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 6px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .result.success {
+            background: #d1fae5;
+            border: 2px solid #10b981;
+            color: #065f46;
+        }
+        
+        .result.error {
+            background: #fee2e2;
+            border: 2px solid #ef4444;
+            color: #991b1b;
+        }
+        
+        .result h3 {
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+        
+        .result-detail {
+            font-family: 'Courier New', monospace;
+            background: rgba(0,0,0,0.05);
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            word-break: break-all;
+        }
+        
+        .info-box {
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .info-box h3 {
+            color: #1e3a8a;
+            margin-bottom: 10px;
+        }
+        
+        .info-box ul {
+            margin-left: 20px;
+        }
+        
+        .info-box li {
+            margin: 8px 0;
+            color: #4b5563;
+        }
+        
+        code {
+            background: #e5e7eb;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .checkpoint-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .checkpoint-card {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .checkpoint-card strong {
+            display: block;
+            color: #6b7280;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+        }
+        
+        .checkpoint-card span {
+            color: #1f2937;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔐 Agent Memory Registry</h1>
+            <p>Verify Merkle Proof for Agent Memory Checkpoints</p>
+        </header>
+        
+        <div class="content">
+            <div class="section info-box">
+                <h3>What is this?</h3>
+                <p>This tool verifies that a specific memory file was included in an on-chain checkpoint. Each checkpoint creates a Merkle tree of all memory files and publishes the root hash to Monad testnet.</p>
+                <ul>
+                    <li>✅ Proves your memory file existed at checkpoint time</li>
+                    <li>✅ Verifies file hasn't been tampered with</li>
+                    <li>✅ Cryptographically links memory to blockchain</li>
+                </ul>
+            </div>
+            
+            <div class="section">
+                <h2>Verify Memory Checkpoint</h2>
+                
+                <label for="fileContent">Memory File Content</label>
+                <textarea id="fileContent" placeholder="Paste your memory file content here..."></textarea>
+                
+                <br><br>
+                
+                <label for="merkleProof">Merkle Proof (JSON array)</label>
+                <textarea id="merkleProof" placeholder='["0xhash1", "0xhash2", "0xhash3", ...]'></textarea>
+                
+                <br><br>
+                
+                <label for="merkleRoot">Merkle Root (from checkpoint)</label>
+                <input type="text" id="merkleRoot" placeholder="0x...">
+                
+                <br><br>
+                
+                <button onclick="verifyProof()">🔍 Verify Proof</button>
+            </div>
+            
+            <div id="result" class="result">
+                <h3 id="resultTitle"></h3>
+                <p id="resultMessage"></p>
+                <div id="resultDetail" class="result-detail"></div>
+            </div>
+            
+            <div class="section info-box" style="margin-top: 40px;">
+                <h3>How to get your proof:</h3>
+                <p>After a checkpoint is published, you can find the Merkle proof in your checkpoint logs:</p>
+                <code>cat memory/2026-02-11.md | grep -A 20 "Checkpoint Details"</code>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script>
+        function sha256(data) {
+            return ethers.utils.sha256(ethers.utils.toUtf8Bytes(data));
+        }
+        
+        function verifyProof() {
+            const fileContent = document.getElementById('fileContent').value.trim();
+            const merkleProofStr = document.getElementById('merkleProof').value.trim();
+            const merkleRoot = document.getElementById('merkleRoot').value.trim();
+            
+            const resultDiv = document.getElementById('result');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultMessage = document.getElementById('resultMessage');
+            const resultDetail = document.getElementById('resultDetail');
+            
+            // Validation
+            if (!fileContent || !merkleProofStr || !merkleRoot) {
+                showError('Please fill in all fields');
+                return;
+            }
+            
+            try {
+                // Parse proof
+                const proof = JSON.parse(merkleProofStr);
+                
+                if (!Array.isArray(proof)) {
+                    showError('Merkle proof must be a JSON array');
+                    return;
+                }
+                
+                // Compute file hash
+                const fileHash = sha256(fileContent);
+                
+                // Verify proof
+                let computedHash = fileHash;
+                
+                for (let i = 0; i < proof.length; i++) {
+                    const proofElement = proof[i];
+                    
+                    // Combine hashes in sorted order
+                    if (computedHash < proofElement) {
+                        computedHash = sha256(computedHash + proofElement.slice(2));
+                    } else {
+                        computedHash = sha256(proofElement.slice(2) + computedHash.slice(2));
+                    }
+                }
+                
+                // Compare with root
+                const isValid = computedHash.toLowerCase() === merkleRoot.toLowerCase();
+                
+                if (isValid) {
+                    showSuccess(fileHash, computedHash);
+                } else {
+                    showInvalid(fileHash, computedHash, merkleRoot);
+                }
+                
+            } catch (e) {
+                showError('Error: ' + e.message);
+            }
+        }
+        
+        function showSuccess(fileHash, computedRoot) {
+            const resultDiv = document.getElementById('result');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultMessage = document.getElementById('resultMessage');
+            const resultDetail = document.getElementById('resultDetail');
+            
+            resultDiv.className = 'result success';
+            resultDiv.style.display = 'block';
+            resultTitle.textContent = '✅ Proof Verified!';
+            resultMessage.textContent = 'This memory file was included in the checkpoint. The Merkle proof is valid.';
+            resultDetail.innerHTML = `
+                <strong>File Hash:</strong><br>${fileHash}<br><br>
+                <strong>Computed Root:</strong><br>${computedRoot}
+            `;
+        }
+        
+        function showInvalid(fileHash, computedRoot, expectedRoot) {
+            const resultDiv = document.getElementById('result');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultMessage = document.getElementById('resultMessage');
+            const resultDetail = document.getElementById('resultDetail');
+            
+            resultDiv.className = 'result error';
+            resultDiv.style.display = 'block';
+            resultTitle.textContent = '❌ Proof Invalid';
+            resultMessage.textContent = 'The computed Merkle root does not match the provided root. File may have been modified or proof is incorrect.';
+            resultDetail.innerHTML = `
+                <strong>File Hash:</strong><br>${fileHash}<br><br>
+                <strong>Computed Root:</strong><br>${computedRoot}<br><br>
+                <strong>Expected Root:</strong><br>${expectedRoot}
+            `;
+        }
+        
+        function showError(message) {
+            const resultDiv = document.getElementById('result');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultMessage = document.getElementById('resultMessage');
+            const resultDetail = document.getElementById('resultDetail');
+            
+            resultDiv.className = 'result error';
+            resultDiv.style.display = 'block';
+            resultTitle.textContent = '⚠️ Error';
+            resultMessage.textContent = message;
+            resultDetail.innerHTML = '';
+        }
+    </script>
+</body>
+</html>
