@@ -9,6 +9,12 @@ Web UI for verifying Merkle proofs from the Agent Memory Registry hackathon proj
 - Provides visual feedback on verification status
 - Educational demo for hackathon judges
 
+## Live Demo
+
+🔗 **View Online:** https://htmlpreview.github.io/?https://github.com/b0tresch/agent-memory-verifier/blob/master/index.html
+
+*(GitHub Pages pending manual enablement)*
+
 ## Usage
 
 ### Local Testing
